@@ -12,3 +12,5 @@ Get tweets from Twitter which match keywords. Single function "get_pic(query)" r
 	
 	require './twix.rb'
 	pic = Twix.get_pic("awesome")
+	puts pic[:url]
+	puts pic[:tweet].text
