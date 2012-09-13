@@ -1,13 +1,14 @@
-twix
+Twix
 ====
 
-Get tweets from Twitter which match keywords. Single function "get_pic(query)" returns a hash with a URL and a twitter object (using the twitter gem)
+Get tweets from Twitter which match keywords. Single function "get_pic(query)" returns a hash with a URL and a twitter object (using the twitter gem).
 
 
-Installation:
+##Installation:
+	
 	%> bundle install
 	
-Usage:
+##Usage:
 	
 	require './twix.rb'
 	pic = Twix.get_pic("awesome")
