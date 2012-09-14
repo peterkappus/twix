@@ -2,46 +2,52 @@ module Twix
   require 'twitter'
   require 'uri' #escaping
 
-  def self.get_pic(query)
-    tweet = url = ""
-    tweets = Twitter.search("#{URI.escape query} (filter:images OR instagr.am OR pic.twitter.com)", :include_entities=>true, :rpp=>5).results
+  def self.get_pics(query,how_many=1)
+    pics = []
+    
+    tweets = Twitter.search("#{URI.escape query} AND (instagr.am OR pic.twitter.com)", :include_entities=>true, :rpp=>how_many).results
 
-    tweets.shuffle.each do |t|
+    tweets.each do |t|
+      
+      result = {}
+      
       if(t.urls.empty? && !t.media.empty?)
-        tweet = t
-        url = t.media.first.media_url unless t.media.empty?
-        break
+        result[:tweet] = t
+        result[:url] = t.media.first.media_url unless t.media.empty?
       else
         if (!t.urls.empty?)
           if(t.urls.first.expanded_url.match("http://instagr.am"))
-            tweet = t
+            result[:tweet] = t
             #eg http://instagr.am/p/PcIUXpS6t5/ => http://instagr.am/p/PcIUXpS6t5/media/?size=l
-            url = t.urls.first.expanded_url.gsub(%r{(?<=http://instagr.am/p/)(\w+/)},'\1media/?size=l') 
-            break
+            result[:url] = t.urls.first.expanded_url.gsub(%r{(?<=http://instagr.am/p/)(\w+/)},'\1media/?size=l') 
           end
       
           #twitpic
           #eg http://twitpic.com/atrxtp
           if(t.urls.first.expanded_url.match("http://twitpic.com"))
-            tweet = t
+            result[:tweet] = t
             #eg http://instagr.am/p/PcIUXpS6t5/ => http://instagr.am/p/PcIUXpS6t5/media/?size=l
-            url = t.urls.first.expanded_url.gsub(%r{(?<=http://twitpic.com/)(\w+)},'show/large/\1') 
-            break
+            result[:url] = t.urls.first.expanded_url.gsub(%r{(?<=http://twitpic.com/)(\w+)},'show/large/\1') 
           end
-      
         end
       end
+      
+      if(result[:url].to_s.empty?)
+        raise "No image found! text: #{t.text} urls: #{t.urls} media: #{t.media}"
+      else
+        pics << result
+      end
+      
     end
 
-    #puts "ERROR: no links found :( #{tweets}" if tweet.to_s.empty?  
 
-    #puts "#{url}\n#{tweet.created_at.strftime("%Y-%m-%d")}   @#{tweet.from_user} #{tweet.text}\n"
+    return pics
+    
 
-    #-L => follow redirects
-    #-s => Silent
-    #{}`curl -Ls #{url} > #{Time.now.to_i.to_s}.jpg`
-
-    return {:url=>url,:tweet=>tweet}
+  end
+  
+  def self.get_pic(query)
+    return get_pics(query).first
   end
   
   

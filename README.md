@@ -1,7 +1,12 @@
 Twix
 ====
 
-Get tweets from Twitter which match keywords. Single function "get_pic(query)" returns a hash with a URL and a twitter object (using the twitter gem).
+Get pictures from Twitter (currently pic.twitter.com or Instagram) who's parent tweets match a given query. 
+
+get_pics(query,how_many)
+returns an array of hashes with a [:url] string and a [:tweet] object 
+
+Uses the awesome twitter gem behind the scenes.
 
 
 ##Installation:
@@ -14,3 +19,6 @@ Get tweets from Twitter which match keywords. Single function "get_pic(query)" r
 	pic = Twix.get_pic("awesome")
 	puts pic[:url]
 	puts pic[:tweet].text
+	
+	pics = Twix.get_pics("lol",20)
+	
