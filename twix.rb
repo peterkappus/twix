@@ -1,12 +1,17 @@
+#https://github.com/peterkappus/twix
 module Twix  
   require 'twitter'
   require 'uri' #escaping
 
   def self.get_pics(query,how_many=1)
     pics = []
-    
-    tweets = Twitter.search("#{URI.escape query} AND (instagr.am OR pic.twitter.com)", :include_entities=>true, :rpp=>how_many).results
 
+    tweets = Twitter.search("#{URI.escape query} AND (instagr.am OR pic.twitter.com)", :include_entities=>true, :rpp=>how_many)
+
+    #dumb hack. Otherwise, we get an error "undefined method 'results' for Array"
+    tweets = tweets.results if how_many > 1
+
+    
     tweets.each do |t|
       
       result = {}
@@ -19,7 +24,7 @@ module Twix
           if(t.urls.first.expanded_url.match("http://instagr.am"))
             result[:tweet] = t
             #eg http://instagr.am/p/PcIUXpS6t5/ => http://instagr.am/p/PcIUXpS6t5/media/?size=l
-            result[:url] = t.urls.first.expanded_url.gsub(%r{(?<=http://instagr.am/p/)(\w+/)},'\1media/?size=l') 
+            result[:url] = t.urls.first.expanded_url.gsub(%r{(?<=http://instagr.am/p/)([-\w]+/)},'\1media/?size=l') 
           end
       
           #twitpic
@@ -27,7 +32,7 @@ module Twix
           if(t.urls.first.expanded_url.match("http://twitpic.com"))
             result[:tweet] = t
             #eg http://instagr.am/p/PcIUXpS6t5/ => http://instagr.am/p/PcIUXpS6t5/media/?size=l
-            result[:url] = t.urls.first.expanded_url.gsub(%r{(?<=http://twitpic.com/)(\w+)},'show/large/\1') 
+            result[:url] = t.urls.first.expanded_url.gsub(%r{(?<=http://twitpic.com/)([-\w]+)},'show/large/\1') 
           end
         end
       end
@@ -47,7 +52,7 @@ module Twix
   end
   
   def self.get_pic(query)
-    return get_pics(query).first
+    return self.get_pics(query).first
   end
   
   
